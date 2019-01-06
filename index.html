@@ -1,0 +1,43 @@
+<!Doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link media="all" rel="stylesheet" href="css/layout.css">
+		<link media="all" rel="stylesheet" href="css/page-note.css">
+		<link media="all" rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+		<script src="js/depencies/markdown-it/markdown-it.js"></script>
+		<script type="module" src="js/main.js"></script>
+	</head>
+	<body>
+		<sauna-page id="all-notes">
+			<div class=""></div>
+			<div><a href="#" data-note-new="">New Note</a></div>
+			<div id="note-list"></div>
+		</sauna-page>
+		<sauna-page id="note">
+			<input id="note-id" type="hidden">
+			<div class="container-full">
+				<div class="container-vertical-middle-full">
+					<div>
+						<div class="btn-group" role="group" aria-label="Basic example">
+							<button type="button" class="btn btn-secondary" id="show-tags">Left</button>
+							<button type="button" class="btn btn-secondary" id="show-attachments">attachemnts</button>
+							<button type="button" class="btn btn-secondary" id="note-close">Close</button>
+						</div>
+						<div>
+							<div id="tags"></div>
+						</div>
+					</div>
+					<div id="note-edit">
+						<textarea></textarea>
+					</div>
+					<div id="note-footer">
+						<div id="counter">Footer</div>
+					</div>
+				</div>
+			</div>
+			<div id="note-preview"></div>
+		</sauna-page>
+	</body>
+</html>

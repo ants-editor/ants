@@ -1,0 +1,21 @@
+
+a.note-list-item
+,a:hover.note-list-item
+{
+	border-bottom: 1px solid #eeeeee;
+	display: block;
+	text-decoration: none;
+	padding: 10px;
+}
+
+
+.list-item-title
+{
+	color: #666666;
+}
+
+.list-item-date
+{
+	color: #aaaaaa;
+	font-size: 12px;
+}
