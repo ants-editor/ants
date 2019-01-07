@@ -19,3 +19,13 @@ a.note-list-item
 	color: #aaaaaa;
 	font-size: 12px;
 }
+
+#all-notes .header
+{
+	border-bottom: 1px solid #eeeeee;
+	min-height: 40px;
+	line-height: 40px;
+	font-weight: bold;
+	color: #666666;
+	padding: 0 10px 0 10px;
+}
