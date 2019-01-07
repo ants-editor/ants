@@ -1,9 +1,15 @@
 
 #note textarea
 {
+	font-family: 'Roboto Mono', monospace;
 	color: black;
 	width: 100%;
 	height: 100%;
 	background-color: white;
 	border: none;
+}
+
+#note-preview.hidden, #note-edit.hidden
+{
+	display: none;
 }

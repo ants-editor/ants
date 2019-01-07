@@ -11,12 +11,26 @@ export default class Note
 		this.textarea = document.querySelector('#note textarea');
 		this.attachments = [];
 		this.tags = [];
+		this.edit = document.getElementById('note-edit');
+		this.preview = document.getElementById('note-preview');
+		Util.getById('note-delete').addEventListener('click',(evt)=>
+		{
+			Util.stopEvent( evt );
+			Util.getById('delete-dialog').showModal();
+		});
+
 
 		Util.delegateEvent('click',document.body,'a[data-note-new]',(evt)=>
 		{
 			console.log('Clicked');
 			Util.stopEvent( evt );
 			this.showNewNote();
+		});
+
+		Util.getById('note-preview-btn').addEventListener('click',(evt)=>
+		{
+			Util.stopEvent( evt );
+			this.togglePreview();
 		});
 
 		document.getElementById('note-close').addEventListener('click',(evt)=>
@@ -80,5 +94,21 @@ export default class Note
 	{
 
 
+	}
+
+	togglePreview()
+	{
+		var md = window.markdownit(
+		{
+  			html:         false,        // Enable HTML tags in source
+  			xhtmlOut:     false,        // Use '/' to close single tags (<br />)
+  			breaks:       false,        // Convert '\n' in paragraphs into <br>
+  			langPrefix:   'language-',  // CSS language prefix for fenced blocks
+  			linkify:      true,         // autoconvert URL-like texts to links
+  			typographer:  true,         // Enable smartypants and other sweet transforms
+  		});      // html / src / debug
+		var result = md.render( this.textarea.value );
+		this.preview.innerHTML = result;
+		this.nav.click_anchorHash('preview-page');
 	}
 }

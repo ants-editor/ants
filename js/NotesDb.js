@@ -7,7 +7,7 @@ export default class NoteDb
 		this.database	= new Finger
 		({
 			name		: 'notes',
-			version	: 2,
+			version	: 6,
 			stores		:{
 				note:
 				{
@@ -17,6 +17,7 @@ export default class NoteDb
 					[
 
 						{ indexName: 'filename', keyPath: 'filename', objectParameters: { uniq: true, multiEntry: false }},
+						{ indexName: 'search', keyPath: 'search', objectParameters: { uniq: false, multiEntry: false }},
 						{ indexName: 'tags' ,keyPath:'tags'	,objectParameters: { uniq: false ,multiEntry: true} },
 						{ indexName: 'created', keyPath:'created', objectParameters:{ uniq: false, multiEntry: false}}
 					]
@@ -38,7 +39,9 @@ export default class NoteDb
 
 	init()
 	{
+		try{
 		return this.database.init();
+		}catch(e){console.log( e ); }
 	}
 
 	getNotes(start, limit)
@@ -58,7 +61,15 @@ export default class NoteDb
 
 		let title = text.trim().split('\n')[0];
 
-		return this.database.addItem('note',null,{ text: text, tags: tags, title: title, created: new Date()});
+		return this.database.addItem('note',null,{ text: text, tags: tags, title: title, search: title.toLowerCase(), created: new Date()});
+	}
+
+	search(name)
+	{
+		if( name === "" )
+			return this.database.getAll('note',{ count: 20});
+
+		return this.database.getAll('note',{ index: 'search', '>=': name, count: 20});
 	}
 
 	saveNote(id, text)
