@@ -91,4 +91,18 @@ export default class NoteDb
 	{
 		this.database.close();
 	}
+
+	getBackup()
+	{
+		return this.database.getAll('notes').then((notes)=>
+		{
+			notes.forEach((n)=>
+			{
+				delete n.search;
+				delete n.title;
+			});
+
+			return Promise.resolve( notes );
+		});
+	}
 }

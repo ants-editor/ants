@@ -36,8 +36,8 @@ window.addEventListener('load',()=>
 			}
 
 			return prev+`<a href="#" class="note-list-item" data-note-id="${note.id}">
-					<div class="list-item-title">${title}</div>
-					<div class="list-item-date">${date}</div>
+					<span class="list-item-title">${title}</span>
+					<span class="list-item-date">${date}</span>
 				</a>`;
 		},'');
 
