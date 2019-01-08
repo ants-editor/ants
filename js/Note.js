@@ -13,6 +13,7 @@ export default class Note
 		this.tags = [];
 		this.edit = document.getElementById('note-edit');
 		this.preview = document.getElementById('note-preview');
+
 		Util.getById('note-delete').addEventListener('click',(evt)=>
 		{
 			Util.stopEvent( evt );
@@ -20,7 +21,7 @@ export default class Note
 		});
 
 
-		Util.delegateEvent('click',document.body,'a[data-note-new]',(evt)=>
+		Util.delegateEvent('click',document.body,'[data-note-new]',(evt)=>
 		{
 			console.log('Clicked');
 			Util.stopEvent( evt );
@@ -35,6 +36,7 @@ export default class Note
 
 		document.getElementById('note-close').addEventListener('click',(evt)=>
 		{
+			console.log('Saving note');
 			try{
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -55,6 +57,7 @@ export default class Note
 				this.notes_db.addNewNote( this.textarea.value, null, null ).then((id)=>
 				{
 					nav.click_anchorHash('#all-notes');
+					console.log('New note added',id);
 				})
 				.catch((e)=>
 				{
@@ -93,7 +96,6 @@ export default class Note
 	init()
 	{
 
-
 	}
 
 	togglePreview()
@@ -109,6 +111,6 @@ export default class Note
   		});      // html / src / debug
 		var result = md.render( this.textarea.value );
 		this.preview.innerHTML = result;
-		this.nav.click_anchorHash('preview-page');
+		this.nav.click_anchorHash('#preview-page');
 	}
 }

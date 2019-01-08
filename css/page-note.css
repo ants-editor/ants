@@ -13,3 +13,12 @@
 {
 	display: none;
 }
+
+#note label i
+{
+	color: rgb(255,64,129);
+}
+#note input
+{
+	padding-left: 30px;
+}

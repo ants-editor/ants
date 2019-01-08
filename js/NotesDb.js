@@ -35,18 +35,21 @@ export default class NoteDb
 				}
 			}
 		});
+		this.database.debug = true;
 	}
 
 	init()
 	{
 		try{
 		return this.database.init();
+			this.database.debug = true;
 		}catch(e){console.log( e ); }
 	}
 
 	getNotes(start, limit)
 	{
-		return this.database.getAll('note',{ start: start, count: 20 });
+		//return this.database.getAll('note',{ start: start, count: 20 });
+		return this.database.customFilter('note', { index: 'created',direction: "prev", count: 20 }, i=> true);
 	}
 
 	getNote(note_id)
