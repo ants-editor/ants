@@ -26,8 +26,14 @@ window.addEventListener('load',()=>
 		let htmlStr = notes.reduce((prev,note)=>
 		{
 			let title = Util.txt2html(note.title);
-			let date_str = note.created.toString();
-			let date = date_str.substring(0,date_str.indexOf("GMT"));
+			let date_str = '';
+			let date = '';
+
+			if( 'created' in note )
+			{
+				date_str = note.created.toString();
+				date = date_str.substring(0,date_str.indexOf("GMT"));
+			}
 
 			return prev+`<a href="#" class="note-list-item" data-note-id="${note.id}">
 					<div class="list-item-title">${title}</div>
