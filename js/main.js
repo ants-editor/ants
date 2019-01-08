@@ -18,10 +18,11 @@ window.addEventListener('load',()=>
 	let note  = null;
 	let list  = Util.getById('note-list');
 
+
 	let renderList =(notes)=>
 	{
 		console.log('Rendering');
-		console.log( notes );
+	//	console.log( notes );
 		try{
 		let htmlStr = notes.reduce((prev,note)=>
 		{
@@ -41,7 +42,7 @@ window.addEventListener('load',()=>
 				</a>`;
 		},'');
 
-		console.log( htmlStr );
+		//console.log( htmlStr );
 		list.innerHTML 	= htmlStr;
 		}catch(e){ console.log( e )}
 
@@ -57,8 +58,7 @@ window.addEventListener('load',()=>
 		db.getNotes(1,20).then( renderList );
 
 		note = new Note( n, db );
-
-	}).catch((foo)=>{console.log(foo)});
+	}).catch((foo)=>{console.log(foo);});
 
 	console.log("BAR");
 
@@ -66,13 +66,34 @@ window.addEventListener('load',()=>
 	Util.delegateEvent('click',list,'[data-note-id]',function(evt)
 	{
 		Util.stopEvent( evt );
-		console.log(  this.getAttribute('data-note-id')  );
-		note.setNote( this.getAttribute('data-note-id') );
+		//console.log(  this.getAttribute('data-note-id')  );
+		//note.setNote( this.getAttribute('data-note-id') );
+		db.getNote(  this.getAttribute('data-note-id') ).then((note)=>
+		{
+			var md = window.markdownit(
+			{
+  				html:         false,        // Enable HTML tags in source
+  				xhtmlOut:     false,        // Use '/' to close single tags (<br />)
+  				breaks:       false,        // Convert '\n' in paragraphs into <br>
+  				langPrefix:   'language-',  // CSS language prefix for fenced blocks
+  				linkify:      true,         // autoconvert URL-like texts to links
+  				typographer:  true,         // Enable smartypants and other sweet transforms
+  			});      // html / src / debug
+
+			var result = md.render( note.text );
+			Util.getById('note-preview').innerHTML = result;
+			n.click_anchorHash('#preview-page');
+		});
 	});
 
 	Util.getById('search-input').addEventListener('keyup',(evt)=>
 	{
 		db.search( evt.target.value ).then( renderList ).catch((e)=>console.log( e ));
+	});
+
+	Util.getById('all-notes').addEventListener('page-show',(evt)=>
+	{
+		db.getNotes(1,20).then( renderList );
 	});
 });
 

@@ -41,8 +41,8 @@ export default class NoteDb
 	init()
 	{
 		try{
-		return this.database.init();
 			this.database.debug = true;
+		return this.database.init();
 		}catch(e){console.log( e ); }
 	}
 
