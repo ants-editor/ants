@@ -81,7 +81,7 @@ export default class NoteDb
 			return Promise.resolve(0);
 
 		let title = text.trim().split('\n')[0];
-		let obj = { id: parseInt(id), text: text, title: title, created: new Date()};
+		let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), created: new Date()};
 		console.log("To save",obj);
 
 		return this.database.put('note', obj );
