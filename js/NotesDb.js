@@ -1,4 +1,6 @@
-import Finger from '../depencies/finger/DatabaseStore.js';
+import Finger from './DatabaseStore.js';
+
+//import Util from '../depencies/Diabetes/Util.js';
 
 export default class NoteDb
 {
@@ -80,11 +82,22 @@ export default class NoteDb
 		if( text.trim() === "" )
 			return Promise.resolve(0);
 
-		let title = text.trim().split('\n')[0];
-		let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), created: new Date()};
+		let is_markdown = false;
+
+		if( /^#+ /mg.test( text ) || /^==/mg.test( text ) )
+			is_markdown = true;
+
+		let title = text.trim().replace(/#/g,' ').split('\n')[0];
+
+		let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), is_markdown: is_markdown, created: new Date()};
 		console.log("To save",obj);
 
 		return this.database.put('note', obj );
+	}
+
+	deleteNote(id)
+	{
+		return this.database.remove('note', parseInt(id ) );
 	}
 
 	close()
