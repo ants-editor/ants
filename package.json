@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "db-finger": "^2.0.2",
+    "del": "^3.0.0",
+    "diabetes": "^1.0.7",
+    "gulp": "^4.0.0",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-clean-css": "^4.0.0",
+    "gulp-closure-compiler": "^0.4.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "promiseutil": "^2.0.0",
+    "sauna-spa": "^2.0.0"
+  }
+}
