@@ -14,25 +14,24 @@ export default class NoteDb
 				note:
 				{
 					keyPath	: 'id',
-					autoincrement: true,
+					autoincrement: false,
 					indexes	:
 					[
-
 						{ indexName: 'filename', keyPath: 'filename', objectParameters: { uniq: true, multiEntry: false }},
 						{ indexName: 'search', keyPath: 'search', objectParameters: { uniq: false, multiEntry: false }},
 						{ indexName: 'tags' ,keyPath:'tags'	,objectParameters: { uniq: false ,multiEntry: true} },
-						{ indexName: 'created', keyPath:'created', objectParameters:{ uniq: false, multiEntry: false}}
+						{ indexName: 'updated', keyPath:'created', objectParameters:{ uniq: false, multiEntry: false}}
 					]
 				},
 				attachement:
 				{
 					keyPath	: 'id',
-					autoincrement: true,
+					autoincrement: false,
 					indexes	:
 					[
 						{ indexName: 'filename', keypath: 'filename', objectParameters: {uniq: true, multiEntry: false }},
 						{ indexName: 'note_id', keypath: 'filename', objectParameters:{ uniq: false, multiEntry: false}},
-						{ indexName: 'created', keypath: 'created', objectParameters:{ uniq: false, multiEntry: false}}
+						{ indexName: 'updated', keypath: 'created', objectParameters:{ uniq: false, multiEntry: false}}
 					]
 				}
 			}
@@ -66,7 +65,7 @@ export default class NoteDb
 
 		let title = text.trim().split('\n')[0];
 
-		return this.database.addItem('note',null,{ text: text, tags: tags, title: title, search: title.toLowerCase(), created: new Date()});
+		return this.database.addItem('note',null,{id: Date.now(), text: text, tags: tags, title: title, search: title.toLowerCase(), updated: new Date()});
 	}
 
 	search(name)
@@ -89,7 +88,7 @@ export default class NoteDb
 
 		let title = text.trim().replace(/#/g,' ').split('\n')[0];
 
-		let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), is_markdown: is_markdown, created: new Date()};
+		let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), is_markdown: is_markdown, updated: new Date()};
 		console.log("To save",obj);
 
 		return this.database.put('note', obj );
