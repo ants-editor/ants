@@ -1,7 +1,10 @@
 import Notes from './NotesDb.js';
-import Navigation from '../depencies/Sauna/js/Navigation.js';
+import Navigation from './sauna/Navigation.js';
+import Util from './Util.js';
 import Note from './Note.js';
-import Util from '../depencies/Diabetes/Util.js';
+
+//import Util from '../node_modules/diabetes/Util.js';
+//import Navigation from '../node_modules/sauna-spa/js/Navigation.js';
 
 let n = new Navigation();
 n.setPageInit('all-notes');
@@ -36,10 +39,18 @@ window.addEventListener('load',()=>
 				date = date_str.substring(0,date_str.indexOf("GMT"));
 			}
 
-			return prev+`<a href="#" class="note-list-item" data-note-id="${note.id}">
+			if( 'is_markdown' in note && note.is_markdown )
+				return prev+`<a href="#" class="note-list-item" data-note-view="${note.id}">
 					<span class="list-item-title">${title}</span>
 					<span class="list-item-date">${date}</span>
 				</a>`;
+			else
+			{
+				return prev+`<a href="#" class="note-list-item" data-note-edit="${note.id}">
+					<span class="list-item-title">${title}</span>
+					<span class="list-item-date">${date}</span>
+				</a>`;
+			}
 		},'');
 
 		//console.log( htmlStr );
@@ -63,12 +74,11 @@ window.addEventListener('load',()=>
 	console.log("BAR");
 
 
-	Util.delegateEvent('click',list,'[data-note-id]',function(evt)
+	Util.delegateEvent('click',document.body,'[data-note-view]',function(evt)
 	{
 		Util.stopEvent( evt );
 		//console.log(  this.getAttribute('data-note-id')  );
-		//note.setNote( this.getAttribute('data-note-id') );
-		db.getNote(  this.getAttribute('data-note-id') ).then((note)=>
+		db.getNote(  this.getAttribute('data-note-view') ).then((note)=>
 		{
 			var md = window.markdownit(
 			{
@@ -81,9 +91,16 @@ window.addEventListener('load',()=>
   			});      // html / src / debug
 
 			var result = md.render( note.text );
+			Util.getById('preview-page-edit-button').setAttribute( 'data-note-edit',note.id );
 			Util.getById('note-preview').innerHTML = result;
 			n.click_anchorHash('#preview-page');
 		});
+	});
+
+	Util.delegateEvent('click',document.body,'[data-note-edit]',function(evt)
+	{
+		Util.stopEvent( evt );
+		note.setNote( this.getAttribute('data-note-edit') );
 	});
 
 	Util.getById('search-input').addEventListener('keyup',(evt)=>
@@ -94,6 +111,11 @@ window.addEventListener('load',()=>
 	Util.getById('all-notes').addEventListener('page-show',(evt)=>
 	{
 		db.getNotes(1,20).then( renderList );
+	});
+
+	Util.delegateEvent('click',document.body,'[data-navigation="back"]',()=>
+	{
+		window.history.back();
 	});
 });
 

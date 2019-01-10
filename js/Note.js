@@ -1,4 +1,6 @@
-import Util from '../depencies/Diabetes/Util.js';
+import Util from './Util.js';
+//import Util from '../node_modules/diabetes/Util.js';
+
 
 export default class Note
 {
@@ -34,12 +36,34 @@ export default class Note
 			this.togglePreview();
 		});
 
-		document.getElementById('note-close').addEventListener('click',(evt)=>
+
+		Util.getById('delete-note-accept').addEventListener('click',(evt)=>
 		{
+			this.notes_db.deleteNote( this.id_input.value ).then(()=>
+			{
+				Util.getById('delete-dialog').close();
+				this.textarea.value = '';
+				nav.click_anchorHash('#all-notes');
+			})
+			.catch((e)=>
+			{
+				console.log( e );
+				Util.getById('delete-dialog').close();
+				nav.click_anchorHash('all-notes');
+			});
+		});
+
+		Util.getById('delete-note-cancel').addEventListener('click',(evt)=>
+		{
+			Util.getById('delete-dialog').close();
+		});
+
+
+		Util.getById('note-close').addEventListener('click',(evt)=>
+		{
+			Util.stopEvent( evt );
 			console.log('Saving note');
 			try{
-			evt.preventDefault();
-			evt.stopPropagation();
 			if( this.id_input.value !== '' )
 			{
 				this.notes_db.saveNote(  this.id_input.value, this.textarea.value).then(()=>
