@@ -11,7 +11,9 @@
     "gulp-htmlmin": "^5.0.1",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
+    "gulp-watch": "^5.0.1",
+    "npm": "^6.5.0",
     "promiseutil": "^2.0.0",
-    "sauna-spa": "^2.0.0"
+    "sauna-spa": "^2.0.2"
   }
 }
