@@ -170,7 +170,8 @@ window.addEventListener('load',()=>
 		{
 			console.log('Backup file prepared to send');
 			let content = JSON.stringify( notes );
-			google.uploadFile('ant-backup.json',content,'application/json')
+
+			google.uploadFile('Ants editor backup','ant-backup.json',content,'application/json')
 			.then((result)=>
 			{
 				console.log('Success',result);
