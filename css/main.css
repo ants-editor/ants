@@ -96,4 +96,7 @@ header ,#all-notes .mdl-layout__header
 	padding: 16px;
 }
 
-
+#all-notes header a
+{
+	color: white;
+}

@@ -5,6 +5,7 @@ export default class GoogleDrive
 		this.client_id = client_id;
 		this.api_key = api_key;
 		this.scopes = scopes;
+		this._isLoad = false;
 	}
 
 	load()
@@ -12,9 +13,13 @@ export default class GoogleDrive
 		/**
 		 *	On load, called to load the auth2 library and API client library.
 		 */
-		return gapi.load('client:auth2').then(()=>
+		return new Promise((resolve,reject)=>
 		{
-			return this.initClient();
+			window.gapi.load('client:auth2',()=>
+			{
+				console.log('Goolgle client loaded');
+				resolve();
+			});
 		});
 	}
 	/**
@@ -24,25 +29,28 @@ export default class GoogleDrive
 	initClient()
 	{
 		let DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+		console.log('Window is window',window.gapi.load );
 
-		return gapi.load('client:auth2')
+
+		return this.load('client:auth2')
 		.then(()=>
 		{
-			return gapi.client.init
+			console.log('Load client and auth2');
+			return window.gapi.client.init
 			({
 			 	apiKey: this.api_key,
 			 	clientId: this.client_id,
 			 	discoveryDocs: DISCOVERY_DOCS,
-			 	scope: SCOPES
+			 	scope: this.scopes
 			});
 		})
 		.then((xxx)=>
 		{
 			console.log( xxx );
-		 	//gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+		 	//window.gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
 		 	// Handle the initial sign-in state.
 		 	//updateSigninStatus();
-			return Promise.resolve( gapi.auth2.getAuthInstance().isSignedIn.get() );
+			return Promise.resolve( window.gapi.auth2.getAuthInstance().isSignedIn.get() );
 		});
 	}
 
@@ -51,7 +59,7 @@ export default class GoogleDrive
 	 */
 	signIn()
 	{
-		return gapi.auth2.getAuthInstance().signIn();
+		return window.gapi.auth2.getAuthInstance().signIn();
 	}
 
 	/**
@@ -59,14 +67,14 @@ export default class GoogleDrive
 	 */
 	signOut()
 	{
-		return gapi.auth2.getAuthInstance().signOut();
+		return window.gapi.auth2.getAuthInstance().signOut();
 	}
 
 	/**
 	 * Print files.
 	 */
 	listFiles() {
-		return gapi.client.drive.files.list({
+		return window.gapi.client.drive.files.list({
 		 'pageSize': 10,
 		 'fields': "nextPageToken, files(id, name)"
 		//'q':"'appDataFolder' in parents"
@@ -93,7 +101,7 @@ export default class GoogleDrive
 				 'mimeType': 'application/vnd.google-apps.folder'
 			};
 
-			gapi.client.drive.files.create
+			window.gapi.client.drive.files.create
 			(
 				{
 					resource: fileMetadata,
@@ -120,7 +128,7 @@ export default class GoogleDrive
 	{
 		return new Promise((resolve,reject)=>
 		{
-			let request = gapi.client.drive.files.get({
+			let request = window.gapi.client.drive.files.get({
 			 'fileId': fileId
 			});
 			request.execute(function(resp) {
@@ -144,7 +152,7 @@ export default class GoogleDrive
 		return new Promise((resolve,reject)=>
 		{
 	 		 if (file.downloadUrl) {
-	 			let accessToken = gapi.auth.getToken().access_token;
+	 			let accessToken = window.gapi.auth.getToken().access_token;
 	 			let xhr = new XMLHttpRequest();
 	 			xhr.open('GET', file.downloadUrl);
 	 			xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
@@ -169,52 +177,56 @@ export default class GoogleDrive
 	* @param {Function} callback Function to call when the request is complete.
 	https://developers.google.com/drive/api/v2/reference/files/insert#examples
 	*/
-	uploadFile(fileData, callback )
+
+	base64Encode(str) {
+    // first we use encodeURIComponent to get percent-encoded UTF-8,
+    // then we convert the percent encodings into raw bytes which
+    // can be fed into btoa.
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+    }));
+	}
+
+
+
+	uploadFile( filename, content, contentType )
 	{
-		return new Promise((resolve,reject)=>
-		{
-			const boundary = '-------314159265358979323846';
-			const delimiter = "\r\n--" + boundary + "\r\n";
-			const close_delim = "\r\n--" + boundary + "--";
+		const boundary = '-------314159265358979323846';
+		const delimiter = "\r\n--" + boundary + "\r\n";
+		const close_delim = "\r\n--" + boundary + "--";
 
-			let reader = new FileReader();
-			reader.readAsBinaryString(fileData);
-			reader.onload = function(e) {
-				let contentType = fileData.type || 'application/octet-stream';
-				let metadata = {
-					'title': fileData.fileName,
-					'mimeType': contentType
-				};
+		let ctype = contentType || 'application/octet-stream';
 
-				let base64Data = btoa(reader.result);
-				let multipartRequestBody =
-						delimiter +
-						'Content-Type: application/json\r\n\r\n' +
-						JSON.stringify(metadata) +
-						delimiter +
-						'Content-Type: ' + contentType + '\r\n' +
-						'Content-Transfer-Encoding: base64\r\n' +
-						'\r\n' +
-						base64Data +
-						close_delim;
+		let metadata = {
+			'title': filename,
+			'mimeType': ctype
+		};
 
-				let request = gapi.client.request({
-						'path': '/upload/drive/v2/files',
-						'method': 'POST',
-						'params': {'uploadType': 'multipart'},
-						'headers': {
-							'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
-						},
-						'body': multipartRequestBody});
+		console.log('Before btoa',content);
+		let base64Data = this.base64Encode( content );
+		console.log('after Before btoa');
+		console.log( content );
+		let multipartRequestBody =
+					delimiter +
+					'Content-Type: application/json\r\n\r\n' +
+					JSON.stringify(metadata) +
+					delimiter +
+					'Content-Type: ' + ctype + '\r\n' +
+					'Content-Transfer-Encoding: base64\r\n' +
+					'\r\n' +
+					base64Data +
+					close_delim;
 
-				let callback = function( file )
-				{
-					console.log(file);
-					resolve( file );
-				};
-
-				request.execute(callback);
-			};
+		return window.gapi.client.request
+		({
+			'path': '/upload/drive/v3/files',
+			'method': 'POST',
+			'params': {'uploadType': 'multipart'},
+			'headers': {
+				'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+			},
+			'body': multipartRequestBody
 		});
 	}
 
@@ -243,7 +255,7 @@ export default class GoogleDrive
 				data +
 				close_delim;
 
-			let request = gapi.client.request({
+			let request = window.gapi.client.request({
 				'path': '/upload/drive/v3/files',
 				'method': 'POST',
 				'params': {'uploadType': 'multipart'},
@@ -270,7 +282,7 @@ export default class GoogleDrive
 		return new Promise((resolve,reject)=>
 		{
 			let file = new File(['Hello, world!'], 'hello world.txt', { type: contentType });
-			let user = gapi.auth2.getAuthInstance().currentUser.get();
+			let user = window.gapi.auth2.getAuthInstance().currentUser.get();
 			let oauthToken = user.getAuthResponse().access_token;
 
 			let initResumable = new XMLHttpRequest();
