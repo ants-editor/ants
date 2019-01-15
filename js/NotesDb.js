@@ -115,7 +115,9 @@ export default class NoteDb
 		this.database.close();
 	}
 
-	getBackupJson()
+
+
+	getBackup()
 	{
 		return this.database.getAll('note').then((notes)=>
 		{
@@ -125,15 +127,23 @@ export default class NoteDb
 				delete n.title;
 			});
 
-			return Promise.resolve( notes );
+			return Promise.resolve({ notes:  notes });
+		});
+	}
+
+	getBackupJson()
+	{
+		return this.getBackup().then((notes)=>
+		{
+			return Promise.resolve(JSON.stringify( notes ) );
 		});
 	}
 
 	getBackupUrl()
 	{
-		return this.getBackupJson().then((notes)=>
+		return this.getBackupJson().then((notesJson)=>
 		{
-			return this.getDownloadHref( { notes: notes }, 'application/json');
+			return this.getDownloadHref( notesJson, 'application/json');
 		});
 	}
 
