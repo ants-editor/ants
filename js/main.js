@@ -92,6 +92,8 @@ Util.addOnLoad(()=>
   				typographer:  true,		 // Enable smartypants and other sweet transforms
   			});	  // html / src / debug
 
+			//Replace Notes and attachments
+
 			var result = md.render( note.text );
 			Util.getById('preview-page-edit-button').setAttribute( 'data-note-edit',note.id );
 			Util.getById('note-preview').innerHTML = result;

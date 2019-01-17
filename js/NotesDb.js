@@ -17,7 +17,7 @@ export default class NoteDb
 					autoincrement: false,
 					indexes	:
 					[
-						{ indexName: 'filename', keyPath: 'filename', objectParameters: { uniq: true, multiEntry: false }},
+						{ indexName: 'title', keyPath: 'title', objectParameters: { uniq: true, multiEntry: false }},
 						{ indexName: 'search', keyPath: 'search', objectParameters: { uniq: false, multiEntry: false }},
 						{ indexName: 'tags' ,keyPath:'tags'	,objectParameters: { uniq: false ,multiEntry: true} },
 						{ indexName: 'updated', keyPath:'updated', objectParameters:{ uniq: false, multiEntry: false}}
@@ -29,8 +29,19 @@ export default class NoteDb
 					autoincrement: false,
 					indexes	:
 					[
-						{ indexName: 'filename', keypath: 'filename', objectParameters: {uniq: true, multiEntry: false }},
+						{ indexName: 'filename', keypath: 'filename', objectParameters: {uniq: false, multiEntry: false }},
 						{ indexName: 'note_id', keypath: 'filename', objectParameters:{ uniq: false, multiEntry: false}},
+						{ indexName: 'updated', keypath: 'updated', objectParameters:{ uniq: false, multiEntry: false}}
+					]
+				},
+				todo:
+				{
+					keyPath	: 'id',
+					autoincrement: false,
+					indexes	:
+					[
+						{ indexName: 'status', keypath: 'status', objectParameters: {uniq: false, multiEntry: false }},
+						{ indexName: 'note', keypath: 'note', objectParameters:{ uniq: false, multiEntry: false}},
 						{ indexName: 'updated', keypath: 'created', objectParameters:{ uniq: false, multiEntry: false}}
 					]
 				}
@@ -43,7 +54,7 @@ export default class NoteDb
 	{
 		try{
 			this.database.debug = true;
-		return this.database.init();
+			return this.database.init();
 		}catch(e){console.log( e ); }
 	}
 
@@ -53,9 +64,17 @@ export default class NoteDb
 		return this.database.customFilter('note', { index: 'updated',direction: "prev", count: 20 }, i=> true);
 	}
 
+	getAttachments(note_id)
+	{
+
+	}
+
 	getNote(note_id)
 	{
-		return this.database.get('note',parseInt( note_id ));
+		return this.database.get('note',parseInt( note_id )).then((note)=>
+		{
+
+		});
 	}
 
 	addNewNote(text, tags)
@@ -99,7 +118,11 @@ export default class NoteDb
 
 			let title = text.trim().replace(/#/g,' ').split('\n')[0].trim();
 
+
 			let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), is_markdown: is_markdown, updated: new Date()};
+
+			if( title === '' )
+				delete obj.title;
 
 			return this.database.put('note', obj );
 		});
@@ -116,6 +139,21 @@ export default class NoteDb
 	}
 
 
+	getAllTitles()
+	{
+		return this.database.getAllKeys('notes',{ index :'title' }).then((keys)=>
+		{
+			keys.sort((a,b)=>
+			{
+				if( a.length == b.length )
+					return 0;
+
+				return a.length > b.length ? -1 : 1;
+			});
+
+			return Promise.resolve( keys );
+		});
+	}
 
 	getBackup()
 	{
