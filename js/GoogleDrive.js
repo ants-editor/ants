@@ -54,6 +54,14 @@ export default class GoogleDrive
 		});
 	}
 
+	isSignedId()
+	{
+		if( typeof window.gapi === "undefined" || window.gapi.auth2 )
+			return false;
+
+		return window.gapi.auth2.getAuthInstance().isSignedIn.get();
+	}
+
 	/**
 		*	Sign in the user upon button click.
 		*/

@@ -208,6 +208,12 @@ Util.addOnLoad(()=>
 
 	let google = new GoogleDrive(CLIENT_ID, API_KEY, SCOPES );
 
+	Util.getById('page-settings').addEventListener('page-show',(evt)=>
+	{
+
+	});
+
+
 	Util.getById('sync-google').addEventListener('click',(evt)=>
 	{
 		Util.stopEvent( evt );
@@ -256,6 +262,9 @@ Util.addOnLoad(()=>
 		})
 		.then((notes)=>
 		{
+			if( notes.length === 0 )
+				return Promise.resolve( true );
+
 			let gen = (note)=>
 			{
 				return db.getNote(note.id).then((n)=>

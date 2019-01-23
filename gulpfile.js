@@ -73,7 +73,6 @@ function watch_task()
 gulp.task('css_task', css_task );
 gulp.task('scripts_task', scripts_task );
 gulp.task('watch_task', watch_task );
-
 gulp.task('default',function(){
 	scripts_task();
 	css_task();

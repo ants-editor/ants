@@ -71,10 +71,7 @@ export default class NoteDb
 
 	getNote(note_id)
 	{
-		return this.database.get('note',parseInt( note_id )).then((note)=>
-		{
-
-		});
+		return this.database.get('note',parseInt( note_id ));
 	}
 
 	addNewNote(text, tags)
@@ -118,11 +115,7 @@ export default class NoteDb
 
 			let title = text.trim().replace(/#/g,' ').split('\n')[0].trim();
 
-
 			let obj = { id: parseInt(id), text: text, title: title, search: title.toLowerCase(), is_markdown: is_markdown, updated: new Date()};
-
-			if( title === '' )
-				delete obj.title;
 
 			return this.database.put('note', obj );
 		});
