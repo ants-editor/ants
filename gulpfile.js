@@ -9,9 +9,9 @@ var gulp			= require('gulp');
 ///var del				= require('del');
 ///var htmlmin			= require('gulp-htmlmin');
 
-let cleanCSS = require('gulp-clean-css');
-var concat 			= require('gulp-concat');
-var mergeStream		= require('merge-stream');
+//let cleanCSS = require('gulp-clean-css');
+//var concat 			= require('gulp-concat');
+//var mergeStream		= require('merge-stream');
 
 //var closureCompiler = require('google-closure-compiler').gulp();
 
@@ -20,7 +20,7 @@ var mergeStream		= require('merge-stream');
 //gulp.task('build',['html' ,'css' ,'scripts' ,'images' ,'manifest']);
 
 
-function css_task()
+function css_task(cb)
 {
 	console.log('css_task');
 	return gulp.src([
@@ -29,12 +29,13 @@ function css_task()
 		'./depencies/dialog-polyfill/dialog-polyfill.css'])
     //.pipe(cleanCSS({}))
     .pipe(gulp.dest('dist/css'));
+	cb();
 }
 
-function scripts_task()
+function scripts_task(cb)
 {
 	console.log('scripts');
-	let base = gulp.src([
+	gulp.src([
 			'./js/*.js',
 			'./depencies/markdown-it/markdown-it.js',
 			'./depencies/dialog-polyfill/dialog-polyfill.js',
@@ -47,15 +48,16 @@ function scripts_task()
 		.pipe( gulp.dest('dist/js/') );
 
 
-	let sauna = gulp.src(['./node_modules/sauna-spa/js/*.js'])
+	gulp.src(['./node_modules/sauna-spa/js/*.js'])
 		.pipe(gulp.dest('dist/js/sauna/') );
 
-	let html = gulp.src(['./index.html']).pipe(gulp.dest('dist/'));
+	gulp.src(['./index.html']).pipe(gulp.dest('dist/'));
 
-	return mergeStream( base, sauna , html);
+	cb();
 }
 
-function watch_task()
+
+function watch_task(cb)
 {
 	console.log('watch');
 	gulp.watch([
@@ -70,14 +72,10 @@ function watch_task()
       		'./node_modules/db-finger/DatabaseStore.js',
       		'./node_modules/diabetes/Util.js'],gulp.parallel('scripts_task','css_task'));
 
+	cb();
 }
 
-gulp.task('css_task', css_task );
+gulp.task('css_task',css_task);
 gulp.task('scripts_task', scripts_task );
-gulp.task('watch_task', watch_task );
-gulp.task('default',function(){
-	scripts_task();
-	css_task();
-	watch_task();
-	return gulp.series('scripts_task','css_task','watch_task');
-});
+
+exports.default = gulp.series( css_task, scripts_task, watch_task );
