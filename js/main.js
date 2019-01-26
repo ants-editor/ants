@@ -143,6 +143,7 @@ Util.addOnLoad(()=>
 		})
 		.catch((error)=>
 		{
+			console.log( error );
 			alert('An error occourred please try again');
 		});
 	});
@@ -183,7 +184,7 @@ Util.addOnLoad(()=>
 				})
 				.catch((e)=>
 				{
-					console.log('Error on importing');
+					console.log('Error on importing', e);
 					alert('An error occourred please try again later');
 				});
 			}

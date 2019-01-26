@@ -23,8 +23,10 @@ var mergeStream		= require('merge-stream');
 function css_task()
 {
 	console.log('css_task');
-	return gulp.src(['./depencies/material-design-lite/material.min.css','./css/*.css'])
-	//.pipe(concat('all.css') )
+	return gulp.src([
+		'./depencies/material-design-lite/material.min.css',
+		'./css/*.css',
+		'./depencies/dialog-polyfill/dialog-polyfill.css'])
     //.pipe(cleanCSS({}))
     .pipe(gulp.dest('dist/css'));
 }

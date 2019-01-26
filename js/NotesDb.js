@@ -77,16 +77,19 @@ export default class NoteDb
 		else
 			return this.database.get('note',parseInt( note_id ) ).then((note)=>
 			{
-				if( 'access_count' in note )
+				if( note )
 				{
-					note.access_count++;
-				}
-				else
-				{
-					note.access_count = 1;
-				}
+					if( 'access_count' in note )
+					{
+						note.access_count++;
+					}
+					else
+					{
+						note.access_count = 1;
+					}
 
-				this.database.put('note', obj ).catch((e)=>{ console.log( e ); });
+					this.database.put('note', note ).catch((e)=>{ console.log( e ); });
+				}
 
 				return Promise.resolve( note );
 			});
@@ -202,7 +205,7 @@ export default class NoteDb
 		{
 			let ctype = contentType ? contentType : 'application/json';
 
-        	var blob = new Blob([typeof object === 'string' ? notes : JSON.stringify( object, null, 2)], {type :  ctype });
+        	var blob = new Blob([ JSON.stringify( object, null, 2)], {type :  ctype });
         	let objectURL = URL.createObjectURL( blob );
         	return resolve( objectURL );
 		});
