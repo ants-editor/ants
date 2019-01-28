@@ -4,15 +4,14 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<script src="js/markdown-it.js"></script>
-		<script src="js/material.min.js"></script>
 		<script src="js/dialog-polyfill.js"></script>
 		<script type="module" src="js/main.js"></script>
-		<!-- link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet" -->
 
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<link rel="stylesheet" type="text/css" href="css/dialog-polyfill.css">
 		<link rel="stylesheet" type="text/css" href="css/github-markdown.css">
 
+		<link media="all" rel="stylesheet" href="Sauna/css/Core.css">
 		<link media="all" rel="stylesheet" href="css/layout.css">
 		<link media="all" rel="stylesheet" href="css/page-note.css">
 		<link media="all" rel="stylesheet" href="css/main.css">
@@ -30,7 +29,7 @@
 	</head>
 	<body>
 		<sauna-page id="all-notes">
-			<header>
+			<header slot="header">
 				<div class="title">Notes</div>
 				<div class="left-center">
 					<div>
@@ -47,11 +46,11 @@
 					</div>
 				</div>
 			</header>
-			<div id="note-list"></div>
-			<div>List</div>
+			<div id="note-list" slot="main"></div>
+			<div slot="footer">Footer</div>
 		</sauna-page>
 		<sauna-page id="preview-page">
-			<header>
+			<header slot="header">
 				<div>
 					<a href="#" class="button-icon" data-navigation="back">
 						<i class="material-icons">arrow_back_ios</i>
@@ -64,7 +63,7 @@
 					</button>
 				</div>
 			</header>
-			<div class="container-vertical-middle-full">
+			<div slot="main">
 				<div>
 					<div id="note-preview" class="markdown-body"></div>
 				</div>
@@ -84,7 +83,7 @@
 						<button type="button" class="mdl-button close" id="delete-note-cancel">Cancel</button>
 					</div>
 				</dialog>
-				<header>
+				 <header slot="main">
 					<input id="note-id" type="hidden">
 					<div>
 						<a href="#" class="button-icon" id="note-close"><i class="material-icons">arrow_back_ios</i></a>
@@ -95,17 +94,16 @@
 						<a href="#" class="button-icon" id="note-delete"><i class="material-icons">delete</i></a>
 					</div>
 				</header>
-				<div id="note-edit">
+				<div id="note-edit" slot="main">
 					<textarea></textarea>
 				</div>
-				<div id="note-footer">
+				<div slot="footer">
 					<div id="counter">Footer</div>
 				</div>
 			</div>
 		</sauna-page>
 		<sauna-page id="page-settings">
-			<div class="page-header-footer">
-				<header>
+				<header slot="header">
 					<div class="right-center">
 						<a href="#" class="button-icon" data-navigation="back">
 							<i class="material-icons">arrow_back_ios</i>
@@ -115,7 +113,7 @@
 						</div>
 					</div>
 				</header>
-				<div class="page-content">
+				<div slot="main" class="page-content">
 					<div>
 						<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
 							<input type="checkbox" id="switch-1" class="mdl-switch__input" checked>
