@@ -19,6 +19,13 @@ var gulp			= require('gulp');
 
 //gulp.task('build',['html' ,'css' ,'scripts' ,'images' ,'manifest']);
 
+function sauna_task(cb)
+{
+	gulp.src(['./node/sauna-spa/css/*.css']).pipe(gulp.dest('dist/Sauna/css/'));
+	gulp.src(['./node/sauna-spa/js/*.js']).pipe(gulp.dest('dist/Sauna/js/'));
+
+	cb();
+}
 
 function css_task(cb)
 {
@@ -26,6 +33,7 @@ function css_task(cb)
 	return gulp.src([
 		'./depencies/material-design-lite/material.min.css',
 		'./css/*.css',
+		'./node/sauna-spa/*.css',
 		'./depencies/dialog-polyfill/dialog-polyfill.css'])
     //.pipe(cleanCSS({}))
     .pipe(gulp.dest('dist/css'));
@@ -47,10 +55,6 @@ function scripts_task(cb)
       		'./node_modules/diabetes/Util.js'])
 		.pipe( gulp.dest('dist/js/') );
 
-
-	gulp.src(['./node_modules/sauna-spa/js/*.js'])
-		.pipe(gulp.dest('dist/js/sauna/') );
-
 	gulp.src(['./index.html']).pipe(gulp.dest('dist/'));
 
 	cb();
@@ -63,19 +67,21 @@ function watch_task(cb)
 	gulp.watch([
 			'./index.html',
 			'./css/*.css',
-			'./node_modules/sauna-spa/js/*.js',
 			'./js/*.js',
+			'./node_modules/sauna-spa/js/*.js',
+			'./node_modules/sauna-spa/css/*.css',
 			'./depencies/markdown-it/markdown-it.js',
 			'./depencies/dialog-polyfill/dialog-polyfill.js',
 			'./depencies/material-design-lite/*.js',
 			'./node_modules/promiseutil/PromiseUtils.js',
       		'./node_modules/db-finger/DatabaseStore.js',
-      		'./node_modules/diabetes/Util.js'],gulp.parallel('scripts_task','css_task'));
+      		'./node_modules/diabetes/Util.js'],gulp.parallel('scripts_task','css_task','sauna_task'));
 
 	cb();
 }
 
+gulp.task('sauna_task',sauna_task);
 gulp.task('css_task',css_task);
 gulp.task('scripts_task', scripts_task );
 
-exports.default = gulp.series( css_task, scripts_task, watch_task );
+exports.default = gulp.series( css_task, scripts_task, watch_task, sauna_task );
