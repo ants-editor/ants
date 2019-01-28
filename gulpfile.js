@@ -21,8 +21,8 @@ var gulp			= require('gulp');
 
 function sauna_task(cb)
 {
-	gulp.src(['./node/sauna-spa/css/*.css']).pipe(gulp.dest('dist/Sauna/css/'));
-	gulp.src(['./node/sauna-spa/js/*.js']).pipe(gulp.dest('dist/Sauna/js/'));
+	gulp.src(['./node_modules/sauna-spa/css/*.css']).pipe(gulp.dest('dist/js/sauna/css/'));
+	gulp.src(['./node_modules/sauna-spa/js/*.js']).pipe(gulp.dest('dist/js/sauna/js/'));
 
 	cb();
 }
@@ -33,7 +33,6 @@ function css_task(cb)
 	return gulp.src([
 		'./depencies/material-design-lite/material.min.css',
 		'./css/*.css',
-		'./node/sauna-spa/*.css',
 		'./depencies/dialog-polyfill/dialog-polyfill.css'])
     //.pipe(cleanCSS({}))
     .pipe(gulp.dest('dist/css'));

@@ -4,6 +4,7 @@
 	--header-height: 55px;
 }
 
+
 header
 {
     display: flex;
@@ -148,3 +149,44 @@ header > div:last-child
     flex: 0 1 auto;
     align-self: auto;
 }
+
+.full-heigth
+{
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+sauna-page>div
+{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: stretch;
+    align-items: stretch;
+    height: 100%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+}
+
+sauna-page>div>footer
+,sauna-page>div>header {
+	order: 0;
+    flex: 0 1 auto;
+    align-self: stretch;
+
+}
+
+sauna-page>div>.main
+{
+    order: 0;
+    flex: 1 1 auto;
+    align-self: stretch;
+	overflow: auto;
+	height: 100%;
+}
+

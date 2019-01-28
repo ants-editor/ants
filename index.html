@@ -11,7 +11,7 @@
 		<link rel="stylesheet" type="text/css" href="css/dialog-polyfill.css">
 		<link rel="stylesheet" type="text/css" href="css/github-markdown.css">
 
-		<link media="all" rel="stylesheet" href="Sauna/css/Core.css">
+		<link media="all" rel="stylesheet" href="js/sauna/css/Sauna.css">
 		<link media="all" rel="stylesheet" href="css/layout.css">
 		<link media="all" rel="stylesheet" href="css/page-note.css">
 		<link media="all" rel="stylesheet" href="css/main.css">
@@ -29,48 +29,50 @@
 	</head>
 	<body>
 		<sauna-page id="all-notes">
-			<header slot="header">
-				<div class="title">Notes</div>
-				<div class="left-center">
-					<div>
-						<label class="button-icon" for="search-input">
-						    <i class="material-icons">search</i>
-						</label>
+			<div>
+				<header >
+					<div class="title">Notes</div>
+					<div class="left-center">
+						<div>
+							<label class="button-icon" for="search-input"><i class="material-icons">search</i></label>
+						</div>
+						<div class="mdl-textfield__expandable-holder">
+						    <input class="" type="text" id="search-input">
+						</div>
+						<div>
+							<a href="#" data-note-new="" class="button-icon"><i class="material-icons">add</i></a>
+							<a href="#page-settings" class="button-icon"><i class="material-icons">settings</i></a>
+						</div>
 					</div>
-					<div class="mdl-textfield__expandable-holder">
-					    <input class="" type="text" id="search-input">
-					</div>
-					<div>
-						<a href="#" data-note-new="" class="button-icon"><i class="material-icons">add</i></a>
-						<a href="#page-settings" class="button-icon"><i class="material-icons">settings</i></a>
-					</div>
-				</div>
-			</header>
-			<div id="note-list" slot="main"></div>
-			<div slot="footer">Footer</div>
+				</header>
+				<div id="note-list" class="main"></div>
+				<footer>Footer</footer>
+			</div>
 		</sauna-page>
 		<sauna-page id="preview-page">
-			<header slot="header">
-				<div>
-					<a href="#" class="button-icon" data-navigation="back">
-						<i class="material-icons">arrow_back_ios</i>
-					</a>
-					<span id="preview-title">Notes</span>
-				</div>
-				<div>
-					<button id="preview-page-edit-button" data-note-edit="" class="button-icon">
-						<i class="material-icons">edit</i>
-					</button>
-				</div>
-			</header>
-			<div slot="main">
-				<div>
-					<div id="note-preview" class="markdown-body"></div>
+			<div>
+				<header >
+					<div>
+						<a href="#" class="button-icon" data-navigation="back">
+							<i class="material-icons">arrow_back_ios</i>
+						</a>
+						<span id="preview-title" class="title">Notes</span>
+					</div>
+					<div class="left-center">
+						<a href="#" id="preview-page-edit-button" data-note-edit="" class="button-icon">
+							<i class="material-icons">edit</i>
+						</a>
+					</div>
+				</header>
+				<div class="main">
+					<div>
+						<div id="note-preview" class="markdown-body"></div>
+					</div>
 				</div>
 			</div>
 		</sauna-page>
 		<sauna-page id="note">
-			<div class="page-header-footer">
+			<div>
 				<dialog id="delete-dialog" class="mdl-dialog">
 					<h4 class="mdl-dialog__title">Delete Note?</h4>
 					<div class="mdl-dialog__content">
@@ -83,37 +85,38 @@
 						<button type="button" class="mdl-button close" id="delete-note-cancel">Cancel</button>
 					</div>
 				</dialog>
-				 <header slot="main">
+				 <header >
 					<input id="note-id" type="hidden">
 					<div>
 						<a href="#" class="button-icon" id="note-close"><i class="material-icons">arrow_back_ios</i></a>
-						<span id="preview-title">Notes</span>
+						<span id="preview-title" class="title">Notes</span>
 					</div>
-					<div>
+					<div class="left-center">
 						<a href="#" class="button-icon" id="note-preview-btn" data-note-view=""><i class="material-icons">visibility</i></a>
 						<a href="#" class="button-icon" id="note-delete"><i class="material-icons">delete</i></a>
 					</div>
 				</header>
-				<div id="note-edit" slot="main">
+				<div id="note-edit" class="main">
 					<textarea></textarea>
 				</div>
-				<div slot="footer">
+				<div >
 					<div id="counter">Footer</div>
 				</div>
 			</div>
 		</sauna-page>
 		<sauna-page id="page-settings">
-				<header slot="header">
+			<div>
+				<header >
 					<div class="right-center">
 						<a href="#" class="button-icon" data-navigation="back">
 							<i class="material-icons">arrow_back_ios</i>
 						</a>
 						<div>
-							<span>Settings</span>
+							<span class="title">Settings</span>
 						</div>
 					</div>
 				</header>
-				<div slot="main" class="page-content">
+				<div class="page-content main">
 					<div>
 						<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
 							<input type="checkbox" id="switch-1" class="mdl-switch__input" checked>

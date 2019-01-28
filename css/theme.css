@@ -53,10 +53,12 @@ header > div:last-child
 header .title
 {
 	font-size: 30px;
+	vertical-align: super;
 }
 
 .button-icon
 {
+	display: inline-block;
 	border-radius: 50%;
 	font-size: 24px;
 	height: 32px;
@@ -68,11 +70,17 @@ header .title
 	overflow: hidden;
 	color: inherit;
 	line-height: normal;
+	text-align: center;
+}
+
+.button-icon>i
+{
+	line-height: 32px;
 }
 
 .button-icon:hover
 {
-    background-color: var(--button-icon-over-bg: );
+    background-color: var(--button-icon-over-bg );
 }
 
 input
