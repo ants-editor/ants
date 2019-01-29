@@ -62,7 +62,7 @@ export default class NoteDb
 	getNotes(start, limit)
 	{
 		//return this.database.getAll('note',{ start: start, count: 20 });
-		return this.database.customFilter('note', { index: 'updated',direction: "prev", count: 20 }, i=> true);
+		return this.database.customFilter('note', { index: 'access_count',direction: "prev", count: 100 }, i=> true);
 	}
 
 	getAttachments(note_id)
@@ -205,7 +205,7 @@ export default class NoteDb
 		{
 			let ctype = contentType ? contentType : 'application/json';
 
-        	var blob = new Blob([ JSON.stringify( object, null, 2)], {type :  ctype });
+			var blob = new Blob([typeof object === "string" ? object : JSON.stringify( object, null, 2)], {type :  ctype });
         	let objectURL = URL.createObjectURL( blob );
         	return resolve( objectURL );
 		});

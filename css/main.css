@@ -29,6 +29,11 @@ a.note-list-item
 	font-size: 12px;
 }
 
+#all-notes .input-container
+{
+	max-width: 100px;
+}
+
 #all-notes .header
 {
 	border-bottom: 1px solid #eeeeee;
@@ -45,7 +50,8 @@ width: 280px; }
 .mdl-dialog__title {
 	padding: 24px 24px 0;
 	margin: 0;
-font-size: 2.5rem; }
+	font-size: 2rem;
+}
 .mdl-dialog__actions {
 	padding: 8px 8px 8px 24px;
 	display: -webkit-flex;
