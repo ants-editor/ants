@@ -54,7 +54,7 @@ function scripts_task(cb)
       		'./node_modules/diabetes/Util.js'])
 		.pipe( gulp.dest('dist/js/') );
 
-	gulp.src(['./index.html']).pipe(gulp.dest('dist/'));
+	gulp.src(['./index.html','./ants.webmanifest']).pipe(gulp.dest('dist/'));
 
 	cb();
 }
@@ -67,6 +67,7 @@ function watch_task(cb)
 			'./index.html',
 			'./css/*.css',
 			'./js/*.js',
+			'./ants.webmanifest',
 			'./node_modules/sauna-spa/js/*.js',
 			'./node_modules/sauna-spa/css/*.css',
 			'./depencies/markdown-it/markdown-it.js',

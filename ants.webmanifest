@@ -1,7 +1,8 @@
 {
-  "name": "Ants Editor",
-  "short_name": "Ants",
-  "start_url": ".",
+  "version": "0.2.0",
+  "name": "Another Note Take Shittier Editor",
+  "short_name": "Editor",
+  "start_url": "index.html",
   "display":"minimal-ui",
   "background_color": "#fff",
   "description": "Another note app",

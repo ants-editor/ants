@@ -2,6 +2,12 @@
 {
 	--button-icon-over-bg: rgba(158,158,158,.4);
 }
+
+.hidden
+{
+	display: none;
+}
+
 body
 {
 	font-family: 'Google Sans',Roboto,Arial,sans-serif;
@@ -15,16 +21,9 @@ body
     line-height: 20px;
 }
 
-header.container-horizontal-last-full
-{
-	height: var(--header-height);
-}
-
-
-
-
 header
 {
+	height	: var( --header-height );
 	padding-left: 16px;
 	padding-right: 16px;
     display: flex;
@@ -37,6 +36,12 @@ header
 	background-color: #263238;
 }
 
+header > div
+{
+    order: 0;
+    flex: 0 1 auto;
+    align-self: center;
+}
 header > div:not(:last-child)
 {
     order: 0;

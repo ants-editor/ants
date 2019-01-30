@@ -242,13 +242,36 @@ Util.addOnLoad(()=>
 		})
 		.then(()=>
 		{
+			return db.getBackupPreferences('google-drive');
+		})
+		.then((file_info )=>
+		{
+			if( file_info )
+			{
+				return Promise.resolve( file_info );
+			}
+
 			return google.listFiles('ant-backup.json').then((response)=>
 			{
 				if( response.result.files.length )
-					return google.downloadFile( response.result.files[0].id ).then((file_content)=>
 					{
-						try{
+					return db.setBackupPreferences('google-drive',response.result.files[0] ).then(()=>
+					{
+						return Promise.resolve( response.result.files[0] );
+					});
+				}
 
+				return Promise.resolve( null );
+			});
+		})
+		.then((file_info)=>
+		{
+			if( file_info === null )
+				return Promise.resolve( [] );
+
+			return google.downloadFile( file_info.id ).then((file_content)=>
+			{
+				try{
 							return Promise.resolve( file_content.result.notes );
 						}
 						catch(parseException)
@@ -257,9 +280,6 @@ Util.addOnLoad(()=>
 							return Promise.resolve([]);
 						}
 					});
-
-				return Promise.resolve([]);
-			});
 		})
 		.then((notes)=>
 		{
@@ -294,22 +314,32 @@ Util.addOnLoad(()=>
 		})
 		.then((content)=>
 		{
-			google.uploadFile('Ants editor backup','ant-backup.json',content,'application/json')
+			return db.getBackupPreferences('google-drive')
+			.then(( file_info )=>
+			{
+				if( file_info )
+				{
+					return google.updateFile( file_info.id, 'Ants editor backup','ant-backup.json',content,'application/json')
 			.then((result)=>
 			{
 				console.log('Success',result);
-		})
-			.catch((e)=>
+					});
+				}
+				else
 			{
-				console.log("Upload error", e );
+					return google.uploadFile('Ants editor backup','ant-backup.json',content,'application/json')
+					.then((result)=>
+					{
+						console.log('Success',result);
+					});
+				}
 			});
 		})
 		.catch((other)=>
 		{
 			if( typeof other == "string" )
 				alert( other );
-			else
-				if( other.msg )
+			else if( other.msg )
 					alert( other.msg );
 		});
 	});
