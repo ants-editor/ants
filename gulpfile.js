@@ -39,6 +39,12 @@ function css_task(cb)
 	cb();
 }
 
+function index_task(cb)
+{
+	gulp.src(['./index.html','./ants.webmanifest']).pipe(gulp.dest('dist/'));
+	cb();
+}
+
 function scripts_task(cb)
 {
 	console.log('scripts');
@@ -54,7 +60,6 @@ function scripts_task(cb)
       		'./node_modules/diabetes/Util.js'])
 		.pipe( gulp.dest('dist/js/') );
 
-	gulp.src(['./index.html','./ants.webmanifest']).pipe(gulp.dest('dist/'));
 
 	cb();
 }
@@ -75,7 +80,7 @@ function watch_task(cb)
 			'./depencies/material-design-lite/*.js',
 			'./node_modules/promiseutil/PromiseUtils.js',
       		'./node_modules/db-finger/DatabaseStore.js',
-      		'./node_modules/diabetes/Util.js'],gulp.parallel('scripts_task','css_task','sauna_task'));
+      		'./node_modules/diabetes/Util.js'],gulp.parallel('scripts_task','css_task','sauna_task','index_task'));
 
 	cb();
 }
@@ -83,5 +88,6 @@ function watch_task(cb)
 gulp.task('sauna_task',sauna_task);
 gulp.task('css_task',css_task);
 gulp.task('scripts_task', scripts_task );
+gulp.task('index_task', index_task);
 
-exports.default = gulp.series( css_task, scripts_task, watch_task, sauna_task );
+exports.default = gulp.series( css_task, scripts_task, watch_task, sauna_task, index_task );
