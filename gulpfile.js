@@ -30,7 +30,7 @@ function sauna_task(cb)
 function css_task(cb)
 {
 	console.log('css_task');
-	return gulp.src([
+	gulp.src([
 		'./depencies/material-design-lite/material.min.css',
 		'./css/*.css',
 		'./depencies/dialog-polyfill/dialog-polyfill.css'])
@@ -59,6 +59,9 @@ function scripts_task(cb)
       		'./node_modules/db-finger/DatabaseStore.js',
       		'./node_modules/diabetes/Util.js'])
 		.pipe( gulp.dest('dist/js/') );
+
+	//for service worker for cache and stuff
+	gulp.src(['./*.js']).pipe( gulp.dest('dist/') );
 
 
 	cb();
