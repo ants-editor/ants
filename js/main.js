@@ -23,8 +23,8 @@ let renderSearch = (data)=>
 		let list  = Util.getById('note-list');
 		let htmlStr = data.reduce((prev,search_item )=>
 		{
-		  let note = search_item.note
-		  let term = search_item.term;
+			let note = search_item.note;
+			let term = search_item.term;
 			let title = Util.txt2html(note.title);
 			let date_str = '';
 			let date = '';
@@ -35,26 +35,19 @@ let renderSearch = (data)=>
 				date = date_str.substring(0,date_str.indexOf("GMT"));
 			}
 
-			if( 'is_markdown' in note && note.is_markdown )
-				return prev+`<a href="#" class="note-list-item" data-note-view="${note.id}">
-					<span class="list-item-title">${title}</span>
-					<span class="list-item-date">${term.term} ${date}</span>
-				</a>`;
-			else
-			{
-				return prev+`<a href="#" class="note-list-item" data-note-edit="${note.id}">
-					<span class="list-item-title">${title}</span>
-					<span class="list-item-date">${term.term} ${date}</span>
-				</a>`;
-			}
+			let mode = 'is_markdown' in note && note.is_markdown ? 'view' : 'edit';
+			return prev+`<a href="#" class="note-list-item" data-note-${mode}="${note.id}">
+				<span class="list-item-title">${title}</span>
+				<span class="list-item-date">${term.term} ${date}</span>
+			</a>`;
 		},'');
 
 		list.innerHTML 	= htmlStr;
-		}
-		catch(e)
-		{
-		  console.error('An error occourred rendering a search',e);
-		}
+	}
+	catch(e)
+	{
+			console.error('An error occourred rendering a search',e);
+	}
 };
 
 let renderList = (notes)=>
@@ -74,18 +67,12 @@ let renderList = (notes)=>
 				date = date_str.substring(0,date_str.indexOf("GMT"));
 			}
 
-			if( 'is_markdown' in note && note.is_markdown )
-				return prev+`<a href="#" class="note-list-item" data-note-view="${note.id}">
-					<span class="list-item-title">${title}</span>
-					<span class="list-item-date">${date}</span>
-				</a>`;
-			else
-			{
-				return prev+`<a href="#" class="note-list-item" data-note-edit="${note.id}">
-					<span class="list-item-title">${title}</span>
-					<span class="list-item-date">${date}</span>
-				</a>`;
-			}
+			let mode = 'is_markdown' in note && note.is_markdown ? 'view' : 'edit';
+
+			return prev+`<a href="#" class="note-list-item" data-note-${mode}="${note.id}">
+				<span class="list-item-title">${title}</span>
+				<span class="list-item-date">${date}</span>
+			</a>`;
 		},'');
 
 		list.innerHTML 	= htmlStr;
@@ -125,13 +112,13 @@ Util.addOnLoad(()=>
 		{
 			var md = window.markdownit(
 			{
-  				html:		 false,		// Enable HTML tags in source
-  				xhtmlOut:	 false,		// Use '/' to close single tags (<br />)
-  				breaks:	   false,		// Convert '\n' in paragraphs into <br>
-  				langPrefix:   'language-',  // CSS language prefix for fenced blocks
-  				linkify:	  true,		 // autoconvert URL-like texts to links
-  				typographer:  true,		 // Enable smartypants and other sweet transforms
-  			});	  // html / src / debug
+					html:		 false,		// Enable HTML tags in source
+					xhtmlOut:	 false,		// Use '/' to close single tags (<br />)
+					breaks:		 false,		// Convert '\n' in paragraphs into <br>
+					langPrefix:   'language-',  // CSS language prefix for fenced blocks
+					linkify:		true,		 // autoconvert URL-like texts to links
+					typographer:  true,		 // Enable smartypants and other sweet transforms
+				});		// html / src / debug
 
 			//Replace Notes and attachments
 
@@ -198,6 +185,11 @@ Util.addOnLoad(()=>
 			console.log('Error',error);
 			alert('An error occourred please try again');
 		});
+	});
+
+	Util.getById('page-settings-download-button').addEventListener('click',(evt)=>
+	{
+		evt.currentTarget.classList.add('hidden');
 	});
 
 	Util.getById('page-settings-import-button').addEventListener('click',(evt)=>
@@ -522,7 +514,4 @@ Util.addOnLoad(()=>
 		});
 	});
 });
-
-
-
 
