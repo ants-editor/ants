@@ -458,26 +458,30 @@ Util.addOnLoad(()=>
 			if( notes.length === 0 )
 				return Promise.resolve( true );
 
-			let gen = (note)=>
+			db.transaction(['note','note_terms'],(stores,txt)=>
 			{
-				return db.getNote(note.id).then((n)=>
+				let promises = [];
+				notes.forEach((note)=>
 				{
-					if( n )
+					promises.push( stores.get( note.id ).then((n)=>
 					{
-						let date = new Date( note.updated );
-						if( date > n.updated )
-							return db.saveNote( note.id, note.text, false );
+						if( n )
+						{
+							let date = new Date( note.updated );
+							if( date > n.updated )
+								return db.updateNoteStore( store.note, note.id, note.text );
 
-						return Promise.resolve( 1 );
-					}
-					else
-					{
-						return db.saveNote( note.id, note.text, true );
-					}
+							return Promise.resolve( 1 );
+						}
+						else
+						{
+							return db.updateNoteStore( store.note, note.id, note.text );
+						}
+					}));
 				});
-			};
+				return Promise.All( promises );
+			});
 
-			return PromiseUtils.runSequential(notes,gen);
 		})
 		.then(()=>
 		{
