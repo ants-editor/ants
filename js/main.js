@@ -201,36 +201,13 @@ Util.addOnLoad(()=>
 		var reader  = new FileReader();
 
 		reader.readAsText(file, "UTF-8");
-		reader.onload = function (evt)
+		reader.onload = (evt)=>
 		{
 			//document.getElementById("fileContents").innerHTML = evt.target.result;
 			try
 			{
 				let obj= JSON.parse( evt.target.result );
-
-				let gen = (note)=>
-				{
-					return db.getNote( note.id ).then((a)=>
-					{
-						let date = new Date( note.updated );
-
-						if( !a || date > a.updated )
-							return db.saveNote( note.id, note.text );
-
-						return Promise.resolve( 1 );
-					});
-				};
-
-				PromiseUtils.runSequential( obj.notes, gen )
-				.then(()=>
-				{
-					alert('Import success');
-				})
-				.catch((e)=>
-				{
-					console.log('Error on importing', e);
-					alert('An error occourred please try again later');
-				});
+				return db.syncNotes( obj.notes );
 			}
 			catch(fileerror)
 			{
@@ -304,26 +281,7 @@ Util.addOnLoad(()=>
 			if( notes.length === 0 )
 				return Promise.resolve( true );
 
-			let gen = (note)=>
-			{
-				return db.getNote(note.id).then((n)=>
-				{
-					if( n )
-					{
-						let date = new Date( note.updated );
-						if( date > n.updated )
-							return db.saveNote( note.id, note.text, false );
-
-						return Promise.resolve( 1 );
-					}
-					else
-					{
-						return db.saveNote( note.id, note.text, true );
-					}
-				});
-			};
-
-			return PromiseUtils.runSequential(notes,gen);
+			return db.syncNotes(notes);
 		})
 		.then(()=>
 		{
@@ -461,13 +419,13 @@ Util.addOnLoad(()=>
 						{
 							let date = new Date( note.updated );
 							if( date > n.updated )
-								return db.updateNoteStore( store.note, note.id, note.text );
+								return db.updateNoteStore( stores, n, note.text );
 
 							return Promise.resolve( 1 );
 						}
 						else
 						{
-							return db.updateNoteStore( store.note, note.id, note.text );
+							return db.updateNoteStore( stores, note, note.text );
 						}
 					}));
 				});

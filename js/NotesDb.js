@@ -1,4 +1,4 @@
-import Finger from './DB.js';
+import Finger from './DatabaseStore.js';
 import PromiseUtil from './PromiseUtils.js';
 
 //import Util from '../depencies/Diabetes/Util.js';
@@ -7,87 +7,72 @@ export default class NoteDb
 {
 	constructor()
 	{
-		this.database	= new Finger
-		({
-			name		: 'notes',
-			version	: 18,
-			stores		:{
-				note:
-				{
-					keyPath	: 'id',
-					autoincrement: false,
-					indexes	:
-					[
-						{ indexName: 'title', keyPath: 'title', objectParameters: { uniq: true, multiEntry: false }},
-						{ indexName: 'search', keyPath: 'search', objectParameters: { uniq: false, multiEntry: false }},
-						{ indexName: 'tags' ,keyPath:'tags'	,objectParameters: { uniq: false ,multiEntry: true} },
-						{ indexName: 'updated', keyPath:'updated', objectParameters:{ uniq: false, multiEntry: false}},
-						{ indexName: 'access_count', keyPath:'access_count', objectParameters:{ uniq: false, multiEntry: false}},
-					]
-				},
-				note_terms:
-				{
-					keyPath: 'id',
-					autoIncrement: true,
-					indexes :
-					[
-						{ indexName: 'note_id', keyPath: 'note_id', objectParameters : { uniq: false, multiEntry: false }},
-						{ indexName: 'term', keyPath: 'term', objectParameters: { uniq: false, multiEntry: false } }
-					]
-				},
-				backup:
-				{
-					keyPath : 'id',
-					autoincrement: false,
-					indexes :[ ]
-				},
-				attachement:
-				{
-					keyPath	: 'id',
-					autoincrement: false,
-					indexes	:
-					[
-						{ indexName: 'filename', keypath: 'filename', objectParameters: {uniq: false, multiEntry: false }},
-						{ indexName: 'note_id', keypath: 'filename', objectParameters:{ uniq: false, multiEntry: false}},
-						{ indexName: 'updated', keypath: 'updated', objectParameters:{ uniq: false, multiEntry: false}}
-					]
-				},
-				todo:
-				{
-					keyPath	: 'id',
-					autoincrement: false,
-					indexes	:
-					[
-						{ indexName: 'status', keypath: 'status', objectParameters: {uniq: false, multiEntry: false }},
-						{ indexName: 'note', keypath: 'note', objectParameters:{ uniq: false, multiEntry: false}},
-						{ indexName: 'updated', keypath: 'created', objectParameters:{ uniq: false, multiEntry: false}}
-					]
-				}
-			}
+		this.database	= Finger.builder('notes',20,{
+			'note':'id,title,search,*tags,updated,access_count',
+			'note_terms':'++id,note_id,term',
+			'backup':'id'
 		});
+
 		this.database.debug = false;
 	}
 
 	updateAllNotes( notes )
 	{
-		return this.database.removeAll('note_terms',{}).then(()=>
+		return  this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
 		{
-		  return this.database.getAll('note',{});
-		})
-		.then((notes)=>
-		{
-			let generator = (note)=>
+			return stores.note_terms.clear().then(()=>
 			{
-				return this.saveNote( note.id, note.text, true );
-			};
-			return PromiseUtil.runSequential( notes, generator );
+				return this.database.getAll('note');
+			})
+			.then((notes)=>
+			{
+				let promises = [];
+				notes.forEach(i=>promises.push(this.updateNoteStore(i.id,i.text,false)));
+				return Promise.all( promises );
+			});
 		});
 	}
+
+	syncNotes(notes)
+	{
+		return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
+		{
+			let promises = [];
+			notes.forEach((note)=>
+			{
+				console.log('Sync info for note',note.id );
+				promises.push(stores.note.get(note.id).then((n)=>
+				{
+					if( n )
+					{
+						let date = new Date( note.updated );
+						if( date > n.updated )
+						{
+							console.log('Updating note',n.id );
+							return this.updateNoteStore(stores, n , note.text );
+						}
+
+						console.log("nothing to do", n.id );
+						return Promise.resolve( 1 );
+					}
+					else
+					{
+						console.log('Saving note', note.id );
+						return this.saveNote( note.id, note.text, true );
+					}
+				}));
+			});
+
+			console.log("Updating", promises.length, "notes" );
+
+			return Promise.all( promises );
+		});
+	}
+
 
 	init()
 	{
 		try{
-			this.database.debug = true;
 			return this.database.init().then((isUpgrade)=>
 			{
 				if( isUpgrade )
@@ -97,16 +82,15 @@ export default class NoteDb
 		}catch(e){console.log( e ); }
 	}
 
-	getTermsIndex( term )
+	getTermsIndex( note_terms_store, term )
 	{
 		let tlower = term.toLowerCase();
 
 		let bigger = tlower.toLowerCase().codePointAt( tlower.length -1 );
 		let next = String.fromCodePoint( bigger+1 );
 		let biggerString = tlower.substring(0, tlower.length-1 )+next;
-		console.log( biggerString );
 
-		return this.database.getAll(['note_terms'],{ index : 'term' , '>=': term.toLowerCase(), '<': biggerString }).then(( terms )=>
+		return note_terms_store.getAll({ index : 'term' , '>=': term.toLowerCase(), '<': biggerString }).then(( terms )=>
 		{
 			terms.sort((a,b)=>
 			{
@@ -191,7 +175,7 @@ export default class NoteDb
 		}
 		else
 		{
-			return this.database.getAll('notes',{ index :'terms' , '>=':terms[ 0 ], count: 40 }).then((notes)=>
+			return this.database.getAll('note',{ index :'terms' , '>=':terms[ 0 ], count: 40 }).then((notes)=>
 			{
 				notes.sort((a,b)=>
 				{
@@ -213,7 +197,7 @@ export default class NoteDb
 	getNotes(start, limit)
 	{
 		//return this.database.getAll('note',{ start: start, count: 20 });
-		return this.database.customFilter('note', { index: 'access_count',direction: "prev", count: 100 }, i=>true);
+		return this.database.getAll('note', { index: 'access_count',direction: "prev", count: 100 }, i=>true);
 	}
 
 	getAttachments(note_id)
@@ -240,10 +224,11 @@ export default class NoteDb
 					{
 						note.access_count = 1;
 					}
+					stores.note.put( note ).catch((e)=>{ console.error('Error on updating note counter'); });
+					return Promise.resolve( note );
 				}
 
-				stores.note.put( note ).catch((e)=>{ console.error('Error on updating note counter'); });
-				return note;
+				return Promise.reject('Note with id ',note_id,' Wasn\'t found');
 			});
 		});
 	}
@@ -253,148 +238,133 @@ export default class NoteDb
 		if( text.trim() === "" )
 			return Promise.resolve(0);
 
-		//let title = text.trim().split('\n')[0];
-		let title = text.trim().replace(/#/g,' ').split('\n')[0].trim();
+		let obj = this.getNoteFromText( text );
+		obj.id = Date.now();
 
+		let terms  = this.getTerms( text );
+		terms.meta_data.forEach( i=>i.note_id = obj.id );
+
+		return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
+		{
+			return Promise.all([
+				stores.note.add( obj ),
+				stores.note_terms.addAllFast( terms.meta_data )
+			]);
+		});
+	}
+
+	getNoteFromText( text )
+	{
 		let is_markdown = false;
 
 		if( /^#+ /mg.test( text ) || /^==/mg.test( text ) )
 			is_markdown = true;
 
+		let access_count = 1;
+
+		if( note && 'access_count' in note )
+			access_count = note.access_count + 1;
+
+		let title = text.trim().replace(/#/g,' ').split('\n')[0].trim();
 		let obj = {
-			id		: Date.now(),
-			text	: text,
-			title	: title,
-			search	: title.toLowerCase(),
-			tags	: tags,
-			updated	: new Date(),
-			is_markdown		: is_markdown,
-			//terms_data		: terms.data,
-			access_count	: 1
+			text			: text
+			,title			: title
+			,search			: title.toLowerCase()
+			,updated		: new Date()
+			,is_markdown	: is_markdown
+			,access_count	: 1
 		};
-		return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
-		{
-			stores.note.add( obj ).then((note_id)=>
-			{
-				let terms = this.getTerms( text );
-				terms.meta_data.forEach( i=>i.note_id = note_id );
-				return stores.note_terms.addAllFast( terms.meta_data );
-			});
-		});
-		/*
-		return this.database.addItem('note',null, obj ).then(( note_id )=>
+		return obj;
+	}
+
+	updateNoteStore(stores, oldNote, text )
+	{
+		let new_note	= this.getNoteFromText( text );
+		new_note.id		= oldNote.id;
+
+		if( 'access_count' in oldNote )
+			new_note.access_count = oldNote.access_count;
+
+		return stores.note_terms.removeAll({ index: 'note_id','=':oldNote.id }).then(()=>
 		{
 			let terms = this.getTerms( text );
-			terms.meta_data.forEach( i=>i.note_id = note_id );
-			return this.database.addItems( 'note_terms',  terms.meta_data ).then(()=>
-			{
-				return ;
-			});
+			terms.meta_data.forEach( i=>i.note_id = oldNote.id );
+
+			console.log('Adding terms',terms.meta_data);
+
+			return Promise.all([
+				stores.note.put( new_note ),
+				stores.note_terms.addAllFast(terms.meta_data )
+			]);
 		});
-		*/
 	}
 
-	/* if note does not exists it fails, if not exits does'n fail */
+	/*force if note does not exists it fails, if not exits does'n fail */
 	saveNote(id, text, force )
 	{
-		let promise = Promise.resolve( null );
-
-		if( !force )
-			promise = this.getNote( id );
-
-		return promise.then((note)=>
+		return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
 		{
-			if( note && note.text ==  text )
-				return Promise.resolve(0);
-
-			if( text.trim() === "" )
-				return Promise.resolve(0);
-
-			let is_markdown = false;
-
-			if( /^#+ /mg.test( text ) || /^==/mg.test( text ) )
-				is_markdown = true;
-
-			let access_count = 1;
-
-			if( note && 'access_count' in note )
-				access_count = note.access_count + 1;
-
-			let title = text.trim().replace(/#/g,' ').split('\n')[0].trim();
-			let obj = {
-				id		: parseInt(id),
-				text	: text,
-				title	: title,
-				search	: title.toLowerCase(),
-				updated	: new Date(),
-				is_markdown	: is_markdown,
-				access_count	: access_count
-			};
-
-			return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
+			if( !force )
 			{
-				if( !stores.note_terms )
-					console.log('It doesnt exits');
-				else
-					console.log( typeof stores.note_terms.removeAll );
-
-				stores.note.put( obj ).then((note)=>
+				return stores.note.get( parseInt( id ) ).then((note)=>
 				{
-					return stores.note_terms.removeAll({ index: 'note_id','=':obj.id });
-				})
-				.then(()=>
-				{
-					let terms = this.getTerms( text );
-					terms.meta_data.forEach( i=>i.note_id = obj.id );
-					return stores.note_terms.addAllFast(terms.meta_data );
-				});
-				/*
-				let results = [
-					stores.note.put( obj ),
-					stores.note_terms.removeAll({ index: 'note_id','=':obj.id }).then(()=>
+					if( note && note.text.trim() != text.trim() )
 					{
-						let terms = this.getTerms( text );
-						terms.meta_data.forEach( i=>i.note_id = note_id );
-						return stores.note_terms.addAllFast(terms.meta_data );
-					})
-				];
-				return Promise.all( results );
-				*/
-			});
-		});
-	}
+						return this.updateNoteStore(stores,note, id, text );
+					}
+					return Promise.resolve( true );
+				});
+			}
 
-	search(name)
-	{
-		//if( name === "" )
-		//	return this.database.getAll('note',{ count: 20});
+			let obj = this.getNoteFromText( text );
+			obj.id = parseInt( id );
 
-		return this.getTermsIndex( name ).then((terms)=>{
-
-			console.log( terms );
-			let ids = terms.map( i => i.note_id );
-			ids.sort();
-			return this.database.getByKey('note',ids).then((notes)=>
+			return stores.note_terms.removeAll({ index: 'note_id','=':obj.id })
+			.then(()=>
 			{
-			  console.log( notes );
-				let indexes = {};
-				terms.forEach( (i,index) => indexes[ i.note_id ] ={ index: index, term: i });
-				let term_notes = [];
+				let terms = this.getTerms( text );
+				terms.meta_data.forEach( i=>i.note_id = obj.id );
 
-				notes.forEach((i)=>{
-				  if( i.id in indexes )
-				    term_notes.push({ note: i, term: indexes[i.id ].term });
-				});
-
-				term_notes.sort(( a,b ) =>
-				{
-					return indexes[ a.note.id ] > indexes[ b.note.id ] ? 1 : -1;
-				});
-
-				return Promise.resolve( term_notes );
+				return Promise.All([
+					stores.note.put( obj ),
+					stores.note_terms.addAllFast( terms.meta_data )
+				]);
 			});
 		});
 	}
+
+	search( name )
+	{
+		return this.database.transaction(['note','note_terms'],'readonly',(stores,txt)=>
+		{
+			return this.getTermsIndex( stores.note_terms, name ).then((terms)=>
+			{
+				console.log( terms );
+				let ids = terms.map( i => i.note_id );
+				ids.sort();
+				return stores.note.getByKeyIndex( ids ).then((notes)=>
+				{
+					console.log('Notes found',notes.length, ids );
+					let indexes = {};
+					terms.forEach( (i,index) => indexes[ i.note_id ] ={ index: index, term: i });
+					let term_notes = [];
+
+					notes.forEach((i)=>{
+					  if( i.id in indexes )
+					    term_notes.push({ note: i, term: indexes[i.id ].term });
+					});
+
+					term_notes.sort(( a,b ) =>
+					{
+						return indexes[ a.note.id ] > indexes[ b.note.id ] ? 1 : -1;
+					});
+
+					return Promise.resolve( term_notes );
+				});
+			});
+		});
+	}
+
 
 	getTerms( string )
 	{
@@ -446,7 +416,7 @@ export default class NoteDb
 
 	getAllTitles()
 	{
-		return this.database.getAllKeys('notes',{ index :'title' }).then((keys)=>
+		return this.database.getAllKeys('note',{ index :'title' }).then((keys)=>
 		{
 			keys.sort((a,b)=>
 			{
@@ -466,8 +436,11 @@ export default class NoteDb
 		{
 			notes.forEach((n)=>
 			{
-				delete n.search;
-				delete n.title;
+				if( 'search' in n )
+					delete n.search;
+
+				if( 'title' in n )
+					delete n.title;
 			});
 
 			return Promise.resolve({ notes:  notes });

@@ -57,6 +57,9 @@ function scripts_task(cb)
 			'./depencies/material-design-lite/*.css',
 			'./node_modules/promiseutil/PromiseUtils.js',
       		'./node_modules/db-finger/DatabaseStore.js',
+      		'./node_modules/db-finger/ObjectStore.js',
+      		'./node_modules/db-finger/SchemaBuilder.js',
+      		'./node_modules/db-finger/OptionsUtils.js',
       		'./node_modules/diabetes/Util.js'])
 		.pipe( gulp.dest('dist/js/') );
 
