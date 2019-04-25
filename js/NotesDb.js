@@ -27,7 +27,7 @@ export default class NoteDb
 			.then((notes)=>
 			{
 				let promises = [];
-				notes.forEach(i=>promises.push(this.updateNoteStore(i.id,i.text,false)));
+				notes.forEach(i=>promises.push(this.updateNoteStore(stores,i,i.text)));
 				return Promise.all( promises );
 			});
 		});
@@ -40,7 +40,8 @@ export default class NoteDb
 			let promises = [];
 			notes.forEach((note)=>
 			{
-				console.log('Sync info for note',note.id );
+				if( this.debug )
+					console.log('Sync info for note',note.id );
 				promises.push(stores.note.get(note.id).then((n)=>
 				{
 					if( n )
@@ -48,27 +49,32 @@ export default class NoteDb
 						let date = new Date( note.updated );
 						if( date > n.updated )
 						{
-							console.log('Updating note',n.id );
-							return this.updateNoteStore(stores, n , note.text );
+							if( this.debug )
+								console.log('Updating note',n.id );
+
+							return this.updateNoteStore(stores,n, note.text );
 						}
 
-						console.log("nothing to do", n.id );
+						if( this.debug )
+							console.log("nothing to do", n.id );
 						return Promise.resolve( 1 );
 					}
 					else
 					{
-						console.log('Saving note', note.id );
-						return this.saveNote( note.id, note.text, true );
+						if( this.debug )
+							console.log('Saving note', note.id );
+						return this.updateNoteStore( stores,note, note.text );
+						//return this.saveNote( note.id, note.text, true );
 					}
 				}));
 			});
 
-			console.log("Updating", promises.length, "notes" );
+			if( this.debug )
+				console.log("Updating", promises.length, "notes" );
 
 			return Promise.all( promises );
 		});
 	}
-
 
 	init()
 	{
@@ -279,13 +285,19 @@ export default class NoteDb
 
 	updateNoteStore(stores, oldNote, text )
 	{
+		if( oldNote && 'text' in oldNote && oldNote.text.trim() === text )
+			return Promise.resolve();
+
 		let new_note	= this.getNoteFromText( text );
 		new_note.id		= oldNote.id;
 
 		if( 'access_count' in oldNote )
 			new_note.access_count = oldNote.access_count;
 
-		return stores.note_terms.removeAll({ index: 'note_id','=':oldNote.id }).then(()=>
+		let p = Promise.resolve();
+
+		return stores.note_terms.removeAll({ index: 'note_id','=':oldNote.id })
+		.then(()=>
 		{
 			let terms = this.getTerms( text );
 			terms.meta_data.forEach( i=>i.note_id = oldNote.id );
@@ -300,35 +312,21 @@ export default class NoteDb
 	}
 
 	/*force if note does not exists it fails, if not exits does'n fail */
-	saveNote(id, text, force )
+	saveNote( id, text )
 	{
 		return this.database.transaction(['note','note_terms'],'readwrite',(stores,txt)=>
 		{
-			if( !force )
+			return stores.note.get( parseInt( id ) ).then((note)=>
 			{
-				return stores.note.get( parseInt( id ) ).then((note)=>
+				if( note )
 				{
-					if( note && note.text.trim() != text.trim() )
+					if(note.text.trim() != text.trim() )
 					{
-						return this.updateNoteStore(stores,note, id, text );
+						return this.updateNoteStore(stores,note,text );
 					}
 					return Promise.resolve( true );
-				});
-			}
-
-			let obj = this.getNoteFromText( text );
-			obj.id = parseInt( id );
-
-			return stores.note_terms.removeAll({ index: 'note_id','=':obj.id })
-			.then(()=>
-			{
-				let terms = this.getTerms( text );
-				terms.meta_data.forEach( i=>i.note_id = obj.id );
-
-				return Promise.All([
-					stores.note.put( obj ),
-					stores.note_terms.addAllFast( terms.meta_data )
-				]);
+				}
+				return this.updateNoteStore(stores,{id:parseInt( id )}, text );
 			});
 		});
 	}
