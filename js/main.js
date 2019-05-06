@@ -1,4 +1,4 @@
-import Notes from './NotesDb.js';
+import NotesDb from './NotesDb.js';
 import Navigation from './sauna/js/Navigation.js';
 import Util from './Util.js';
 import Note from './Note.js';
@@ -8,8 +8,8 @@ import PromiseUtils from './PromiseUtils.js';
 //import Util from '../node_modules/diabetes/Util.js';
 //import Navigation from '../node_modules/sauna-spa/js/Navigation.js';
 
-let n = new Navigation();
-n.setPageInit('all-notes');
+let navigation = new Navigation();
+navigation.setPageInit('all-notes');
 
 window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
    console.log("Error occured: " + errorMsg);//or any message
@@ -86,7 +86,7 @@ let renderList = (notes)=>
 Util.addOnLoad(()=>
 {
 	console.log('load window');
-	let db = new Notes();
+	let db = new NotesDb();
 	let note  = null;
 
 	console.log('init');
@@ -98,7 +98,7 @@ Util.addOnLoad(()=>
 		console.log('getting notes');
 		db.getNotes(1,20).then( renderList );
 
-		note = new Note( n, db );
+		note = new Note( navigation, db );
 	}).catch((foo)=>{console.log(foo);});
 
 	console.log("BAR");
@@ -125,14 +125,14 @@ Util.addOnLoad(()=>
 			var result = md.render( note.text );
 			Util.getById('preview-page-edit-button').setAttribute( 'data-note-edit',note.id );
 			Util.getById('note-preview').innerHTML = result;
-			n.click_anchorHash('#preview-page');
+			navigation.click_anchorHash('#preview-page');
 		});
 	});
 
 	Util.delegateEvent('click',document.body,'[data-settings]',function(evt)
 	{
 		Util.stopEvent( evt );
-		n.click_anchorHash('#page-settings');
+		navigation.click_anchorHash('#page-settings');
 	});
 
 	Util.delegateEvent('click',document.body,'[data-note-edit]',function(evt)
