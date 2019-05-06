@@ -340,6 +340,7 @@ export default class NoteDb
 				console.log( terms );
 				let ids = terms.map( i => i.note_id );
 				ids.sort();
+
 				return stores.note.getByKeyIndex( ids ).then((notes)=>
 				{
 					console.log('Notes found',notes.length, ids );
@@ -348,13 +349,15 @@ export default class NoteDb
 					let term_notes = [];
 
 					notes.forEach((i)=>{
-					  if( i.id in indexes )
 					    term_notes.push({ note: i, term: indexes[i.id ].term });
 					});
 
 					term_notes.sort(( a,b ) =>
 					{
-						return indexes[ a.note.id ] > indexes[ b.note.id ] ? 1 : -1;
+						if( indexes[ a.note.id ].index == indexes[ b.note.id ].index )
+							return 0;
+
+						return indexes[ a.note.id ].index > indexes[ b.note.id ].index ? 1 : -1;
 					});
 
 					return Promise.resolve( term_notes );
